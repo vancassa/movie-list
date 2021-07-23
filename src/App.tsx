@@ -1,24 +1,93 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { useCallback, useEffect, useState } from "react";
+import "./App.css";
+import api from "./app/api";
+import { IMovieResponse, IMovieSearchResult } from "./app/types";
+import useDebounce from "./utils/useDebounce";
+import Detail from "./views/Detail";
+import MovieList from "./views/MovieList";
 
+const DEBOUNCE_DELAY = 500;
 function App() {
+  const [searchQuery, setSearchQuery] = useState("");
+  const debouncedSearchQuery = useDebounce(searchQuery, DEBOUNCE_DELAY);
+  const [movieList, setMovieList] = useState<IMovieSearchResult[]>([]);
+  const [showMovieDetails, setShowMovieDetails] = useState(false);
+  const [currentImdbID, setCurrentImdbID] = useState("");
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [totalResults, setTotalResults] = useState<number>(0);
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const moveToDetails = (imdbID: string) => {
+    setShowMovieDetails(true);
+    setCurrentImdbID(imdbID);
+  };
+
+  const goBackToMain = () => {
+    setShowMovieDetails(false);
+    setCurrentImdbID("");
+  };
+
+  const handleSearchQueryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+  };
+
+  const loadAndReplace = useCallback(() => {
+    api.search(debouncedSearchQuery, 1).then((response: IMovieResponse) => {
+      if (response.Search?.length > 0) {
+        setMovieList(response.Search);
+      } else {
+        setMovieList([]);
+      }
+      setCurrentPage(1);
+      setTotalResults(response.totalResults ? parseInt(response.totalResults) : 0);
+      setErrorMessage(response.Error);
+    });
+  }, [debouncedSearchQuery]);
+
+  const loadAndAppend = () => {
+    if (!searchQuery) {
+      return;
+    }
+
+    api.search(searchQuery, currentPage + 1).then((response: IMovieResponse) => {
+      if (response.Search?.length > 0) {
+        setMovieList([...movieList, ...response.Search]);
+        setCurrentPage(currentPage + 1);
+      }
+      setErrorMessage(response.Error);
+    });
+  };
+
+  useEffect(() => {
+    if (!debouncedSearchQuery) {
+      return;
+    }
+    loadAndReplace();
+  }, [debouncedSearchQuery, loadAndReplace]);
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      {showMovieDetails ? (
+        <Detail imdbID={currentImdbID} goBackToMain={goBackToMain} />
+      ) : (
+        <div>
+          <label htmlFor="title">Enter movie title: </label>
+          <input id="title" name="title" value={searchQuery} onChange={handleSearchQueryChange} />
+          <div>{errorMessage}</div>
+          <MovieList
+            loadMoreNumbers={loadAndAppend}
+            hasMoreData={movieList.length < totalResults}
+            searchQuery={debouncedSearchQuery}
+            movieList={movieList}
+            moveToDetails={moveToDetails}
+          />
+          {movieList?.length > 0 && (
+            <div>
+              {movieList.length} of {totalResults}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
