@@ -5,24 +5,22 @@ interface Props {
   searchQuery: string;
   movieList: IMovieSearchResult[];
   moveToDetails: (imdbID: string) => void;
-  loadMoreNumbers: () => void;
+  loadMoreData: () => void;
   hasMoreData: boolean;
 }
 
-const MovieList = (props: Props) => {
-  const { hasMoreData, loadMoreNumbers, movieList, moveToDetails } = props;
-
+const MovieList = ({ hasMoreData, loadMoreData, movieList, moveToDetails }: Props) => {
   return (
     <InfiniteScroll
       hasMoreData={hasMoreData}
       isLoading={false}
-      onBottomHit={loadMoreNumbers}
+      onBottomHit={loadMoreData}
       loadOnMount={false}
     >
       {movieList?.map((movie) => (
         <div
           key={movie.imdbID}
-          className="movie-list-item"
+          className="movie-list__item"
           onClick={() => moveToDetails(movie.imdbID)}
         >
           <div>

@@ -25,9 +25,12 @@ const Detail = ({ imdbID, goBackToMain }: Props) => {
   return (
     <div>
       <header>
-        <div onClick={goBackToMain}>Back</div>
+        <div onClick={goBackToMain} className="nav-back">
+          Back
+        </div>
       </header>
       <img src={movieDetails.Poster} alt={movieDetails.Title} width="300px" />
+      {/* Sample data to show */}
       <div>{movieDetails.Title}</div>
       <div>{movieDetails.Year}</div>
       <div>{movieDetails.Actors}</div>

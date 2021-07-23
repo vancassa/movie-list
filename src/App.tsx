@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import "./App.css";
 import api from "./app/api";
 import { IMovieResponse, IMovieSearchResult } from "./app/types";
@@ -17,6 +17,22 @@ function App() {
   const [totalResults, setTotalResults] = useState<number>(0);
   const [currentPage, setCurrentPage] = useState(1);
 
+  useEffect(() => {
+    if (!debouncedSearchQuery) {
+      return;
+    }
+    api.search(debouncedSearchQuery, 1).then((response: IMovieResponse) => {
+      if (response.Search?.length > 0) {
+        setMovieList(response.Search);
+      } else {
+        setMovieList([]);
+      }
+      setCurrentPage(1);
+      setTotalResults(response.totalResults ? parseInt(response.totalResults) : 0);
+      setErrorMessage(response.Error);
+    });
+  }, [debouncedSearchQuery]);
+
   const moveToDetails = (imdbID: string) => {
     setShowMovieDetails(true);
     setCurrentImdbID(imdbID);
@@ -31,25 +47,12 @@ function App() {
     setSearchQuery(e.target.value);
   };
 
-  const loadAndReplace = useCallback(() => {
-    api.search(debouncedSearchQuery, 1).then((response: IMovieResponse) => {
-      if (response.Search?.length > 0) {
-        setMovieList(response.Search);
-      } else {
-        setMovieList([]);
-      }
-      setCurrentPage(1);
-      setTotalResults(response.totalResults ? parseInt(response.totalResults) : 0);
-      setErrorMessage(response.Error);
-    });
-  }, [debouncedSearchQuery]);
-
-  const loadAndAppend = () => {
-    if (!searchQuery) {
+  const loadMoreData = () => {
+    if (!debouncedSearchQuery) {
       return;
     }
 
-    api.search(searchQuery, currentPage + 1).then((response: IMovieResponse) => {
+    api.search(debouncedSearchQuery, currentPage + 1).then((response: IMovieResponse) => {
       if (response.Search?.length > 0) {
         setMovieList([...movieList, ...response.Search]);
         setCurrentPage(currentPage + 1);
@@ -57,13 +60,6 @@ function App() {
       setErrorMessage(response.Error);
     });
   };
-
-  useEffect(() => {
-    if (!debouncedSearchQuery) {
-      return;
-    }
-    loadAndReplace();
-  }, [debouncedSearchQuery, loadAndReplace]);
 
   return (
     <div className="App">
@@ -75,7 +71,7 @@ function App() {
           <input id="title" name="title" value={searchQuery} onChange={handleSearchQueryChange} />
           <div>{errorMessage}</div>
           <MovieList
-            loadMoreNumbers={loadAndAppend}
+            loadMoreData={loadMoreData}
             hasMoreData={movieList.length < totalResults}
             searchQuery={debouncedSearchQuery}
             movieList={movieList}
