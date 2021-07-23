@@ -2,7 +2,6 @@ import { IMovieSearchResult } from "../app/types";
 import InfiniteScroll from "../utils/InfiniteScroll";
 
 interface Props {
-  searchQuery: string;
   movieList: IMovieSearchResult[];
   moveToDetails: (imdbID: string) => void;
   loadMoreData: () => void;

@@ -68,12 +68,17 @@ function App() {
       ) : (
         <div>
           <label htmlFor="title">Enter movie title: </label>
-          <input id="title" name="title" value={searchQuery} onChange={handleSearchQueryChange} />
+          <input
+            id="title"
+            data-testid="test-input-title"
+            name="title"
+            value={searchQuery}
+            onChange={handleSearchQueryChange}
+          />
           <div>{errorMessage}</div>
           <MovieList
             loadMoreData={loadMoreData}
             hasMoreData={movieList.length < totalResults}
-            searchQuery={debouncedSearchQuery}
             movieList={movieList}
             moveToDetails={moveToDetails}
           />

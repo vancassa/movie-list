@@ -43,6 +43,8 @@
     ]
   },
   "devDependencies": {
-    "@types/lodash.debounce": "^4.0.6"
+    "@mangm/ts-mock-generator": "^0.10.2",
+    "@types/lodash.debounce": "^4.0.6",
+    "intermock": "^0.2.5"
   }
 }

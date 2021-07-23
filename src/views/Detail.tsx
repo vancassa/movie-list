@@ -12,9 +12,14 @@ const Detail = ({ imdbID, goBackToMain }: Props) => {
 
   useEffect(() => {
     if (imdbID) {
-      api.getDetails(imdbID).then((data) => {
-        setMovieDetails(data);
-      });
+      api
+        .getDetails(imdbID)
+        .then((data) => {
+          setMovieDetails(data);
+        })
+        .catch((err) => {
+          throw new Error(err);
+        });
     }
   }, [imdbID]);
 
@@ -25,7 +30,7 @@ const Detail = ({ imdbID, goBackToMain }: Props) => {
   return (
     <div>
       <header>
-        <div onClick={goBackToMain} className="nav-back">
+        <div onClick={goBackToMain} className="nav-back" data-testid="test-back-button">
           Back
         </div>
       </header>
