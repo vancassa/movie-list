@@ -3,6 +3,10 @@ import { act, fireEvent, render, screen, waitFor } from "@testing-library/react"
 import Detail from "./Detail";
 import { mockMovieDetails } from "../mockData";
 
+/**
+ * This test file is mocking fetch and checking if fetch is called
+ */
+
 describe("Movie details", () => {
   let originFetch: any;
   beforeEach(() => {

@@ -4,6 +4,11 @@ import App from "./App";
 import { mockSearchResult } from "./mockData";
 import api from "./app/api";
 
+/**
+ * This test file is mocking our api object and checking if the api object is called,
+ * instead of mocking fetch function
+ */
+
 jest.mock("./app/api", () => {
   return {
     search: jest.fn(),
@@ -18,11 +23,7 @@ describe("Main app", () => {
   });
 
   it("search for movies upon input", async () => {
-    (api.search as jest.Mock).mockImplementation(
-      jest.fn().mockResolvedValue({
-        data: [],
-      })
-    );
+    (api.search as jest.Mock).mockResolvedValue(mockSearchResult);
 
     const { getByTestId } = render(<App />);
 
